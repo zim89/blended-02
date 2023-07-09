@@ -1,5 +1,5 @@
 import { Component } from 'react';
-
+import { MdFrontLoader } from 'react-icons/md';
 import * as ImageService from 'service/image-service';
 import { Button, SearchForm, Grid, GridItem, Text, CardItem } from 'components';
 
@@ -40,14 +40,53 @@ export class Gallery extends Component {
   };
 
   onSubmit = value => {
-    this.setState({ query: value });
+    this.setState({
+      query: value,
+      images: [],
+      page: 1,
+      total: 0,
+      error: null,
+      isLoading: false,
+    });
   };
+
+  handleLoadMoreClick = event => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
+  };
+
   render() {
     console.log(this.state.images);
     return (
       <>
         <SearchForm onSubmit={this.onSubmit} />
-        {/* <Text textAlign="center">Sorry. There are no images ... 😭</Text> */}
+        {this.state.error && (
+          <Text textAlign="center">Sorry. There is some error ... 🥵</Text>
+        )}
+
+        {this.state.images.length === 0 &&
+          this.state.query !== '' &&
+          !this.state.isLoading && (
+            <Text textAlign="center">Sorry. There is no any image ... 🤐</Text>
+          )}
+
+        {this.state.isLoading && <MdFrontLoader />}
+
+        <Grid>
+          {' '}
+          {/*ul*/}
+          {this.state.images.map(({ id, avg_color, src, alt }) => (
+            <GridItem key={id}>
+              <CardItem color={avg_color}>
+                <img src={src?.large} alt={alt} />
+              </CardItem>
+            </GridItem>
+          ))}
+        </Grid>
+        {this.state.query !== '' &&
+          this.state.images.length !== 0 &&
+          this.state.total > this.state.images.length && (
+            <Button onClick={this.handleLoadMoreClick}>Load more</Button>
+          )}
       </>
     );
   }
